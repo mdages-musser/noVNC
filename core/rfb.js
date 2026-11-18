@@ -2222,6 +2222,14 @@ export default class RFB extends EventTargetMixin {
 
         this._fbDepth = 24;
 
+        // B&R VC4 VNC servers ignore SetPixelFormat and always send their
+        // native BGRX layout, so swap red/blue locally instead.
+        this._display.swapRedBlue = this._fbName.startsWith("VC Project") &&
+            bpp === 32 && redShift === 16 && blueShift === 0;
+        if (this._display.swapRedBlue) {
+            Log.Warn("B&R VC server ignores SetPixelFormat. Swapping red/blue locally.");
+        }
+
         if (this._fbName === "Intel(r) AMT KVM") {
             Log.Warn("Intel AMT KVM only supports 8/16 bit depths. Using low color mode.");
             this._fbDepth = 8;

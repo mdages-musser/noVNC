@@ -411,6 +411,13 @@ export default class Display {
             let data = new Uint8ClampedArray(arr.buffer,
                                              arr.byteOffset + offset,
                                              width * height * 4);
+            if (this.swapRedBlue) {
+                for (let i = 0; i < data.length; i += 4) {
+                    const red = data[i];
+                    data[i] = data[i + 2];
+                    data[i + 2] = red;
+                }
+            }
             let img = new ImageData(data, width, height);
             this._drawCtx.putImageData(img, x, y);
             this._damage(x, y, width, height);
@@ -472,7 +479,9 @@ export default class Display {
     }
 
     _setFillColor(color) {
-        const newStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
+        const newStyle = this.swapRedBlue ?
+            'rgb(' + color[2] + ',' + color[1] + ',' + color[0] + ')' :
+            'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
         if (newStyle !== this._prevDrawStyle) {
             this._drawCtx.fillStyle = newStyle;
             this._prevDrawStyle = newStyle;
