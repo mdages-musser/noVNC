@@ -8,8 +8,8 @@ $env:PYTHONPATH = $PSScriptRoot
 
 $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
 if (Test-Path $edge) {
-	Start-Process $edge -ArgumentList "--app=http://localhost:$port/connect.html", '--window-size=480,420'
+	Start-Process $edge -ArgumentList "--app=http://127.0.0.1:$port/connect.html", '--window-size=480,420'
 }
 
-Write-Host "Launcher: http://localhost:$port/connect.html  (Ctrl+C to stop)"
-python -m websockify --web $repo --token-plugin anyhost.AnyHost "127.0.0.1:$port"
+Write-Host "Launcher: http://127.0.0.1:$port/connect.html  (Ctrl+C to stop)"
+python (Join-Path $PSScriptRoot 'serve.py') --web $repo --token-plugin anyhost.AnyHost "127.0.0.1:$port"
