@@ -6,6 +6,7 @@ Fork-local tools for viewing B&R VC4 visualizations (ARsim or a real target) thr
 |---|---|
 | `mise install` | Installs the pinned Python and creates `.venv` |
 | `mise run start` | Starts websockify on `127.0.0.1:6080` and opens `connect.html` in an Edge app window |
+| `mise run orca -- -target 127.0.0.1:5903` | Starts the proxy if needed and opens the target inline in an Orca browser tab (default `127.0.0.1:5902`) |
 | `mise run probe -- 127.0.0.1:5902 1` | Prints a server's native pixel format and whether it honours SetPixelFormat |
 
 | File | Purpose |
@@ -15,6 +16,7 @@ Fork-local tools for viewing B&R VC4 visualizations (ARsim or a real target) thr
 | `vncfmt.py` | The pixel-format probe |
 | `serve.py` | Runs websockify with `Cache-Control: no-cache`, so browsers never run stale noVNC JS |
 | `start.ps1` | What `mise run start` runs |
+| `orca.ps1` | What `mise run orca` runs |
 
 Bookmark a target directly:
 `http://127.0.0.1:6080/vnc.html?host=127.0.0.1&port=6080&autoconnect=1&resize=scale&show_dot=true&path=websockify%3Ftoken%3D127.0.0.1%3A5902`

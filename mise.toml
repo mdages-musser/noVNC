@@ -15,6 +15,11 @@ description = "Start the local proxy on 127.0.0.1:6080 and open the launcher win
 depends = ["setup"]
 run = "powershell -NoProfile -ExecutionPolicy Bypass -File utils/br/start.ps1"
 
+[tasks.orca]
+description = "Open a VNC target inline in an Orca tab: mise run orca -- [-target host:port] [-password pw] [-quality 2|6|9]"
+depends = ["setup"]
+run = "powershell -NoProfile -ExecutionPolicy Bypass -File utils/br/orca.ps1"
+
 [tasks.probe]
 description = "Check a VNC server's pixel format: mise run probe -- host[:port] [password]"
 depends = ["setup"]
