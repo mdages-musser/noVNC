@@ -1,0 +1,2 @@
+websockify==0.13.0
+pycryptodome==4.5.0

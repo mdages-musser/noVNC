@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!-- Local launcher: type a VNC host, open it in its own window (served by `mise run start`). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>noVNC Connect</title>
+<style>
+	body { font: 14px "Segoe UI", sans-serif; margin: 0; padding: 16px; background: #f0f0f0; color: #111; }
+	h1 { font-size: 16px; margin: 0 0 12px; }
+	.row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+	label { width: 80px; }
+	input[type=text], input[type=password], input[type=number], select { flex: 1; padding: 4px 6px; font: inherit; }
+	button { padding: 5px 16px; font: inherit; }
+	#recent { list-style: none; padding: 0; margin: 4px 0 0; max-height: 180px; overflow-y: auto;
+		background: #fff; border: 1px solid #bbb; }
+	#recent li { padding: 4px 8px; cursor: pointer; display: flex; justify-content: space-between; }
+	#recent li:hover { background: #dde8f5; }
+	#recent .forget { color: #888; padding: 0 4px; }
+	.hint { color: #555; font-size: 12px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>VNC Server</h1>
+<form id="form">
+	<div class="row">
+		<label for="target">Host</label>
+		<input id="target" type="text" placeholder="192.168.1.20 or 192.168.1.20:5902" autofocus required>
+	</div>
+	<div class="row">
+		<label for="password">Password</label>
+		<input id="password" type="password" placeholder="optional; noVNC asks if needed">
+	</div>
+	<div class="row">
+		<label for="quality">Quality</label>
+		<select id="quality">
+			<option value="2">Low (fast)</option>
+			<option value="6" selected>Medium</option>
+			<option value="9">High</option>
+		</select>
+		<button type="submit">Connect</button>
+	</div>
+</form>
+<div>Recent</div>
+<ul id="recent"></ul>
+<div class="hint">Port defaults to 5900. ARsim FZ_SIM: 127.0.0.1:5902 (hmi_fz), 127.0.0.1:5903 (hmi_fw).</div>
+<script>
+	const RECENT_KEY = 'connect.recent';
+	const form = document.getElementById('form');
+	const targetInput = document.getElementById('target');
+
+	function loadRecent() {
+		try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { return []; }
+	}
+
+	function saveRecent(list) {
+		try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 15))); } catch { /* private mode */ }
+	}
+
+	function renderRecent() {
+		const ul = document.getElementById('recent');
+		ul.replaceChildren();
+		for (const target of loadRecent()) {
+			const li = document.createElement('li');
+			li.textContent = target;
+			li.title = 'Click to fill, double-click to connect';
+			li.onclick = () => { targetInput.value = target; };
+			li.ondblclick = () => { targetInput.value = target; connect(); };
+			const forget = document.createElement('span');
+			forget.className = 'forget';
+			forget.textContent = 'x';
+			forget.title = 'Remove';
+			forget.onclick = (e) => {
+				e.stopPropagation();
+				saveRecent(loadRecent().filter(t => t !== target));
+				renderRecent();
+			};
+			li.append(forget);
+			ul.append(li);
+		}
+	}
+
+	function connect() {
+		let target = targetInput.value.trim();
+		if (!target) { return; }
+		if (!target.includes(':')) { target += ':5900'; }
+		saveRecent([target, ...loadRecent().filter(t => t !== target)]);
+		renderRecent();
+
+		const params = new URLSearchParams({
+			host: location.hostname,
+			port: location.port,
+			path: 'websockify?token=' + target,
+			autoconnect: '1',
+			reconnect: '1',
+			resize: 'scale',
+			show_dot: 'true',
+			quality: document.getElementById('quality').value,
+			compression: '9',
+		});
+		const password = document.getElementById('password').value;
+		if (password) { params.set('password', password); }
+
+		// One window per target; reconnecting to the same target reuses its window.
+		window.open('vnc.html?' + params, 'vnc_' + target.replace(/\W/g, '_'),
+			'popup,width=1296,height=1060');
+	}
+
+	form.onsubmit = (e) => { e.preventDefault(); connect(); };
+	renderRecent();
+</script>
+</body>
+</html>
